@@ -12,11 +12,7 @@ dist/
 # User content and guidance files
 .agents/
 .gemini/
-docs/
-Tai_Lieu/
 password.txt
-Coding.md
-GEMINI.md
 *.instructions.md
 *.prompt.md
 *.agent.md

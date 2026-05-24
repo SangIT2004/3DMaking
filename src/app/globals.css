@@ -1,19 +1,54 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-@theme {
-  --color-background: #0F1117;
-  --color-foreground: #FFFFFF;
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-fg);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--foreground);
+  --radius: 0.5rem;
 }
 
 @layer base {
-  :root {
+  :root, .dark {
     --background: #0F1117;
-    --foreground: #FFFFFF;
+    --foreground: oklch(0.985 0 0);
+    --card: #12141E;
+    --border: rgba(255, 255, 255, 0.08);
+    --input: rgba(255, 255, 255, 0.05);
+    --ring: rgba(109, 40, 217, 0.6); /* violet focus ring */
+    --primary: #6D28D9; /* violet-700 */
+    --primary-foreground: oklch(0.985 0 0);
+    --secondary: rgba(255, 255, 255, 0.08);
+    --muted: #1C1E2A;
+    --muted-fg: #717282;
+    --destructive: #D1334F;
+    --radius: 0.5rem;
   }
-  
+
   body {
     background-color: var(--background);
     color: var(--foreground);
-    @apply antialiased;
+    @apply antialiased bg-background text-foreground;
+  }
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
   }
 }
