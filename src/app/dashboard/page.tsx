@@ -77,7 +77,7 @@ export default async function DashboardPage() {
       </header>
 
       <div className="flex flex-1">
-        <Sidebar />
+        <Sidebar totalProjects={projects?.length || 0} />
 
         <main className="flex-1 p-6 overflow-y-auto">
           <div className="flex items-center justify-between mb-8">
@@ -99,12 +99,12 @@ export default async function DashboardPage() {
             {/* New project skeleton button */}
             <CreateProjectButton isHero />
 
-            {projects && projects.map((project) => (
+            {projects && projects.map((project: any) => (
               <ProjectCard key={project.id} project={project} />
             ))}
           </div>
 
-          <RecentActivity />
+          <RecentActivity activities={[]} />
         </main>
       </div>
     </div>
