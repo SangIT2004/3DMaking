@@ -9,6 +9,9 @@ import { Chair } from "./objects/Chair";
 import { Shelf } from "./objects/Shelf";
 import { Lamp } from "./objects/Lamp";
 import { Group, Mesh } from "three";
+import { saveEntity } from "@/app/editor/actions";
+import { useDebouncedCallback } from "use-debounce";
+import { toast } from "sonner";
 
 export function InteractiveObject({ entity }: { entity: Entity }) {
   const groupRef = useRef<Group>(null);
@@ -16,8 +19,14 @@ export function InteractiveObject({ entity }: { entity: Entity }) {
   const selectEntity = useEditorStore((state) => state.selectEntity);
   const updateEntity = useEditorStore((state) => state.updateEntity);
   const transformMode = useEditorStore((state) => state.transformMode);
+  const roomId = useEditorStore((state) => state.roomId);
   
   const isSelected = selectedId === entity.id;
+
+  const debouncedSave = useDebouncedCallback(async (updatedEntity, rid) => {
+    const res = await saveEntity(updatedEntity, rid);
+    if (res.error) toast.error("Lỗi khi đồng bộ vị trí");
+  }, 500);
 
   const renderObject = () => {
     switch (entity.type) {
@@ -44,7 +53,6 @@ export function InteractiveObject({ entity }: { entity: Entity }) {
       >
         {renderObject()}
         
-        {/* Selection Highlight - simple bounding box or similar could be added here */}
         {isSelected && (
           <mesh>
             <boxGeometry args={[1.1, 1.1, 1.1]} />
@@ -58,13 +66,15 @@ export function InteractiveObject({ entity }: { entity: Entity }) {
           object={groupRef.current}
           mode={transformMode}
           onMouseUp={() => {
-            if (groupRef.current) {
+            if (groupRef.current && roomId) {
               const { position, rotation, scale } = groupRef.current;
-              updateEntity(entity.id, {
-                position: [position.x, position.y, position.z],
-                rotation: [rotation.x, rotation.y, rotation.z],
-                scale: [scale.x, scale.y, scale.z],
-              });
+              const updatedData = {
+                position: [position.x, position.y, position.z] as [number, number, number],
+                rotation: [rotation.x, rotation.y, rotation.z] as [number, number, number],
+                scale: [scale.x, scale.y, scale.z] as [number, number, number],
+              };
+              updateEntity(entity.id, updatedData);
+              debouncedSave({ ...entity, ...updatedData }, roomId);
             }
           }}
         />

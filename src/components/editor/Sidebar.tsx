@@ -1,9 +1,11 @@
 'use client'
 
 import { useEditorStore, EntityType } from "@/store/useEditorStore";
-import { Box, MousePointer2, Move, RotateCcw, Maximize, Square, Lamp, Sofa, Table as TableIcon, LayoutPanelLeft } from "lucide-react";
+import { Move, RotateCcw, Maximize, Square, Lamp, Sofa, Table as TableIcon, LayoutPanelLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { saveEntity } from "@/app/editor/actions";
+import { toast } from "sonner";
 
 const TOOLS: { type: EntityType; icon: any; label: string }[] = [
   { type: 'box', icon: Square, label: 'Khối hộp' },
@@ -17,9 +19,19 @@ export function Sidebar() {
   const addEntity = useEditorStore((state) => state.addEntity);
   const transformMode = useEditorStore((state) => state.transformMode);
   const setTransformMode = useEditorStore((state) => state.setTransformMode);
+  const roomId = useEditorStore((state) => state.roomId);
+
+  const handleAdd = async (type: EntityType) => {
+    const id = addEntity(type);
+    const newEntity = useEditorStore.getState().entities.find(e => e.id === id);
+    if (newEntity && roomId) {
+      const res = await saveEntity(newEntity, roomId);
+      if (res.error) toast.error("Không thể lưu vật thể mới");
+    }
+  };
 
   return (
-    <div className="w-64 h-full bg-[#161822]/80 backdrop-blur-xl border-r border-white/5 flex flex-col p-4 gap-6">
+    <div className="flex-1 flex flex-col p-4 gap-6 overflow-y-auto">
       <div>
         <h2 className="text-white/40 text-[10px] uppercase tracking-wider font-bold mb-3">Công cụ chỉnh sửa</h2>
         <div className="grid grid-cols-3 gap-2">
@@ -61,7 +73,7 @@ export function Sidebar() {
               key={tool.type}
               variant="ghost"
               className="w-full justify-start gap-3 h-11 text-gray-300 hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10"
-              onClick={() => addEntity(tool.type)}
+              onClick={() => handleAdd(tool.type)}
             >
               <tool.icon className="h-4 w-4" />
               <span className="text-sm font-normal">{tool.label}</span>

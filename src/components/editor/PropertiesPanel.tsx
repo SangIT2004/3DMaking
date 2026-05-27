@@ -4,6 +4,10 @@ import { useEditorStore } from "@/store/useEditorStore";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Trash2, X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { deleteEntity, saveEntity } from "@/app/editor/actions";
+import { toast } from "sonner";
+import { useDebouncedCallback } from "use-debounce";
 
 export function PropertiesPanel() {
   const selectedId = useEditorStore((state) => state.selectedId);
@@ -11,35 +15,71 @@ export function PropertiesPanel() {
   const selectEntity = useEditorStore((state) => state.selectEntity);
   const updateEntity = useEditorStore((state) => state.updateEntity);
   const removeEntity = useEditorStore((state) => state.removeEntity);
+  const roomId = useEditorStore((state) => state.roomId);
 
   const selectedEntity = entities.find((e) => e.id === selectedId);
 
-  if (!selectedId || !selectedEntity) return null;
+  const debouncedSave = useDebouncedCallback(async (entity, rid) => {
+    const res = await saveEntity(entity, rid);
+    if (res.error) toast.error("Lỗi khi lưu thay đổi");
+  }, 500);
+
+  if (!selectedId || !selectedEntity) {
+    return (
+      <div className="p-4 text-center mt-20 text-gray-500 text-xs overflow-hidden whitespace-nowrap">
+        Chọn một vật thể để xem thuộc tính
+      </div>
+    );
+  }
 
   const handleUpdate = (field: string, axis: number, value: string) => {
     const numValue = parseFloat(value) || 0;
     const current = (selectedEntity as any)[field] as [number, number, number];
     const next = [...current] as [number, number, number];
     next[axis] = numValue;
-    updateEntity(selectedId, { [field]: next });
+    
+    const updates = { [field]: next };
+    updateEntity(selectedId, updates);
+    
+    if (roomId) {
+      debouncedSave({ ...selectedEntity, ...updates }, roomId);
+    }
+  };
+
+  const handleUpdateSingle = (updates: any) => {
+    updateEntity(selectedId, updates);
+    if (roomId) {
+      debouncedSave({ ...selectedEntity, ...updates }, roomId);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm("Bạn có chắc chắn muốn xóa vật thể này?")) return;
+    const res = await deleteEntity(selectedId);
+    if (res.error) {
+      toast.error("Lỗi khi xóa: " + res.error);
+    } else {
+      removeEntity(selectedId);
+      toast.success("Đã xóa vật thể");
+    }
   };
 
   return (
-    <div className="w-72 h-full bg-[#161822]/80 backdrop-blur-xl border-l border-white/5 flex flex-col overflow-y-auto">
-      <div className="p-4 border-b border-white/5 flex items-center justify-between">
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="p-4 border-b border-white/5 flex items-center justify-between whitespace-nowrap">
         <h2 className="text-white font-medium text-sm">Thuộc tính</h2>
         <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-white" onClick={() => selectEntity(null)}>
           <X className="h-4 w-4" />
         </Button>
       </div>
 
-      <div className="p-4 space-y-6">
+      <div className="p-4 space-y-6 overflow-y-auto">
         {/* Name */}
         <div className="space-y-2">
           <label className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Tên vật thể</label>
           <Input 
             value={selectedEntity.name} 
-            onChange={(e) => updateEntity(selectedId, { name: e.target.value })}
+            onChange={(e) => handleUpdateSingle({ name: e.target.value })}
             className="h-9 bg-black/20 border-white/10 text-gray-200"
           />
         </div>
@@ -51,12 +91,12 @@ export function PropertiesPanel() {
             <Input 
               type="color" 
               value={selectedEntity.color} 
-              onChange={(e) => updateEntity(selectedId, { color: e.target.value })}
+              onChange={(e) => handleUpdateSingle({ color: e.target.value })}
               className="h-9 w-12 p-1 bg-black/20 border-white/10"
             />
             <Input 
               value={selectedEntity.color} 
-              onChange={(e) => updateEntity(selectedId, { color: e.target.value })}
+              onChange={(e) => handleUpdateSingle({ color: e.target.value })}
               className="h-9 flex-1 bg-black/20 border-white/10 text-gray-200 uppercase"
             />
           </div>
@@ -123,7 +163,7 @@ export function PropertiesPanel() {
           <Button 
             variant="destructive" 
             className="w-full gap-2 h-10 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20"
-            onClick={() => removeEntity(selectedId)}
+            onClick={handleDelete}
           >
             <Trash2 className="h-4 w-4" />
             Xóa vật thể
