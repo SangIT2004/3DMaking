@@ -8,9 +8,6 @@ export function RoomEnvironment() {
       {/* Controls */}
       <OrbitControls 
         makeDefault 
-        minPolarAngle={0} 
-        maxPolarAngle={Math.PI / 2.1} 
-        dampingFactor={0.05}
       />
 
       {/* Lighting */}
