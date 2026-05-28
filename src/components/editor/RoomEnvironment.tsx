@@ -1,8 +1,14 @@
+
 'use client'
 
-import { OrbitControls, Grid, SoftShadows } from "@react-three/drei";
+import { OrbitControls, Grid } from "@react-three/drei";
+
+import { useEditorStore } from "@/store/useEditorStore";
+import { RoomShell } from "./RoomShell";
 
 export function RoomEnvironment() {
+  const envSettings = useEditorStore((state) => state.environmentSettings);
+
   return (
     <>
       {/* Controls */}
@@ -11,15 +17,20 @@ export function RoomEnvironment() {
       />
 
       {/* Lighting */}
-      <ambientLight intensity={0.5} />
+      <ambientLight intensity={envSettings.lightIntensity * 0.3} />
       <directionalLight
-        position={[5, 10, 5]}
-        intensity={1.5}
+        position={[6, 10, 6]}
+        intensity={envSettings.lightIntensity * 0.95}
         castShadow
         shadow-mapSize={[1024, 1024]}
       >
-        <orthographicCamera attach="shadow-camera" args={[-10, 10, 10, -10, 0.1, 20]} />
+        <orthographicCamera attach="shadow-camera" args={[-12, 12, 12, -12, 0.1, 30]} />
       </directionalLight>
+
+      <directionalLight position={[-4, 6, -5]} intensity={envSettings.lightIntensity * 0.35} color="#7c8db8" />
+
+      {/* Room Shell */}
+      <RoomShell />
 
       {/* Grid Floor */}
       <Grid
@@ -32,7 +43,7 @@ export function RoomEnvironment() {
         cellColor="#1e293b"
       />
 
-      {/* Basic Floor Plane for shadows */}
+      {/* Invisible floor plane for shadows */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow>
         <planeGeometry args={[100, 100]} />
         <meshStandardMaterial transparent opacity={0} />

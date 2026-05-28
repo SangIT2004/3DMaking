@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import * as THREE from 'three';
-import { STLLoader } from 'three/examples/jsm/loaders/STLLoader';
+import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
 
 // Biến global để giữ instance WASM tránh khởi tạo lại nhiều lần gây lỗi memory
 let globalOpenSCAD: any = null;
@@ -19,8 +19,8 @@ async function loadOpenSCAD() {
       const mod = await import('openscad-wasm');
       
       // Xử lý các kiểu export khác nhau của gói openscad-wasm
-      let factory = mod.default;
-      if (!factory && typeof mod === 'function') factory = mod;
+      const modAny = mod as any;
+      let factory = modAny.default ?? modAny;
       if (factory.default) factory = factory.default;
 
       if (typeof factory !== 'function') {

@@ -5,21 +5,23 @@ import { revalidatePath } from 'next/cache'
 
 export async function getEditorData(projectId: string) {
   const supabase = createClient()
-  
-  // 1. Get project
-  const { data: project, error: projectError } = await supabase
+  const projectQuery = supabase
     .from('projects')
-    .select('*')
+    .select('id, name, user_id, thumbnail_url, is_public, created_at, updated_at, description')
     .eq('id', projectId)
     .single()
 
-  if (projectError || !project) return { error: 'Project not found' }
-
-  // 2. Get or Create Room
-  let { data: rooms, error: roomError } = await supabase
+  const roomsQuery = supabase
     .from('rooms')
     .select('*')
     .eq('project_id', projectId)
+
+  const [{ data: project, error: projectError }, { data: rooms, error: roomError }] = await Promise.all([
+    projectQuery,
+    roomsQuery,
+  ])
+
+  if (projectError || !project) return { error: 'Project not found' }
 
   let room;
   if (roomError || !rooms || rooms.length === 0) {
@@ -38,7 +40,7 @@ export async function getEditorData(projectId: string) {
   // 3. Get Entities
   const { data: entities, error: entitiesError } = await supabase
     .from('entities')
-    .select('*')
+    .select('id, room_id, type, position, rotation, scale, color, metadata, scad_code, prompt, created_at, updated_at')
     .eq('room_id', room.id)
 
   return {
@@ -59,7 +61,7 @@ export async function saveEntity(entity: any, roomId: string) {
     rotation: { x: entity.rotation[0], y: entity.rotation[1], z: entity.rotation[2] },
     scale: { x: entity.scale[0], y: entity.scale[1], z: entity.scale[2] },
     color: entity.color,
-    metadata: { name: entity.name },
+    metadata: { name: entity.name, ...(entity.metadata || {}) },
     ...(entity.scad_code && { scad_code: entity.scad_code }),
     ...(entity.prompt && { prompt: entity.prompt })
   }
@@ -81,6 +83,17 @@ export async function deleteEntity(id: string) {
 
   if (error) return { error: error.message }
   return { success: true }
+}
+
+export async function updateRoomEnvironment(roomId: string, settings: any) {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from('rooms')
+    .update({ environment_settings: settings })
+    .eq('id', roomId);
+
+  if (error) return { error: error.message };
+  return { success: true };
 }
 
 export async function saveAILog(projectId: string, prompt: string, scadCode: string) {

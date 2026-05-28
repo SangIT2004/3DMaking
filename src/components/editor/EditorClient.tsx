@@ -15,20 +15,110 @@ interface EditorClientProps {
   roomId: string;
   projectName: string;
   initialEntities: Entity[];
+  initialEnvSettings?: any;
 }
 
-export function EditorClient({ projectId, roomId, projectName, initialEntities }: EditorClientProps) {
+export function EditorClient({ projectId, roomId, projectName, initialEntities, initialEnvSettings }: EditorClientProps) {
   const setRoomId = useEditorStore((state) => state.setRoomId);
   const setEntities = useEditorStore((state) => state.setEntities);
+  const setEnvironmentSettings = useEditorStore((state) => state.setEnvironmentSettings);
   const isSidebarOpen = useEditorStore((state) => state.isSidebarOpen);
   const isPropertiesOpen = useEditorStore((state) => state.isPropertiesOpen);
   const setIsSidebarOpen = useEditorStore((state) => state.setIsSidebarOpen);
   const setIsPropertiesOpen = useEditorStore((state) => state.setIsPropertiesOpen);
+  const setTransformMode = useEditorStore((state) => state.setTransformMode);
+  const duplicateSelected = useEditorStore((state) => state.duplicateSelected);
+  const deleteSelected = useEditorStore((state) => state.deleteSelected);
+  const moveSelected = useEditorStore((state) => state.moveSelected);
+  const clearSelection = useEditorStore((state) => state.clearSelection);
+  const reorderEntity = useEditorStore((state) => state.reorderEntity);
+  const selectedId = useEditorStore((state) => state.selectedId);
 
   useEffect(() => {
     setRoomId(roomId);
     setEntities(initialEntities);
-  }, [roomId, initialEntities, setRoomId, setEntities]);
+    if (initialEnvSettings) {
+      setEnvironmentSettings(initialEnvSettings);
+    }
+  }, [roomId, initialEntities, initialEnvSettings, setRoomId, setEntities, setEnvironmentSettings]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const isTypingTarget = !!target && ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName);
+      if (isTypingTarget) return;
+
+      const key = event.key.toLowerCase();
+      const step = event.shiftKey ? 0.25 : 0.08;
+
+      if ((event.metaKey || event.ctrlKey) && key === 'd') {
+        event.preventDefault();
+        duplicateSelected();
+        return;
+      }
+
+      if ((event.metaKey || event.ctrlKey) && key === 'g') {
+        event.preventDefault();
+        if (selectedId) {
+          reorderEntity(selectedId, event.shiftKey ? 'backward' : 'forward');
+        }
+        return;
+      }
+
+      if (key === 'delete' || key === 'backspace') {
+        event.preventDefault();
+        deleteSelected();
+        return;
+      }
+
+      if (key === 'escape') {
+        clearSelection();
+        return;
+      }
+
+      if (key === 't') {
+        setTransformMode('translate');
+        return;
+      }
+
+      if (key === 'r') {
+        setTransformMode('rotate');
+        return;
+      }
+
+      if (key === 's') {
+        setTransformMode('scale');
+        return;
+      }
+
+      if (key === 'arrowup') {
+        event.preventDefault();
+        moveSelected([0, 0, -step]);
+        return;
+      }
+
+      if (key === 'arrowdown') {
+        event.preventDefault();
+        moveSelected([0, 0, step]);
+        return;
+      }
+
+      if (key === 'arrowleft') {
+        event.preventDefault();
+        moveSelected([-step, 0, 0]);
+        return;
+      }
+
+      if (key === 'arrowright') {
+        event.preventDefault();
+        moveSelected([step, 0, 0]);
+        return;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [clearSelection, deleteSelected, duplicateSelected, moveSelected, reorderEntity, selectedId, setTransformMode]);
 
   return (
     <div className="relative w-full h-full flex flex-col overflow-hidden bg-[#0F1117]">
@@ -41,7 +131,7 @@ export function EditorClient({ projectId, roomId, projectName, initialEntities }
               <span className="text-xs">Dashboard</span>
             </Button>
           </a>
-          <div className="h-4 w-[1px] bg-white/10" />
+          <div className="h-4 w-px bg-white/10" />
           <h1 className="text-white font-medium text-xs uppercase tracking-widest opacity-60">
             {projectName}
           </h1>
@@ -53,12 +143,12 @@ export function EditorClient({ projectId, roomId, projectName, initialEntities }
       </div>
 
       <div className="flex-1 relative">
-        <ResizablePanelGroup direction="horizontal" className="h-full">
+        <ResizablePanelGroup direction="horizontal" className="h-full min-h-0 overflow-hidden">
           {/* Sidebar */}
           {isSidebarOpen && (
             <>
-              <ResizablePanel defaultSize={20} minSize={15} maxSize={30} className="bg-[#161822]/80 backdrop-blur-xl">
-                <div className="h-full flex flex-col relative">
+              <ResizablePanel defaultSize={20} minSize={15} maxSize={30} className="bg-[#161822]/80 backdrop-blur-xl overflow-hidden min-h-0">
+                <div className="h-full min-h-0 flex flex-col relative overflow-hidden">
                   <Sidebar projectId={projectId} />
                   <Button
                     variant="ghost"
@@ -89,8 +179,8 @@ export function EditorClient({ projectId, roomId, projectName, initialEntities }
           )}
 
           {/* Main Canvas */}
-          <ResizablePanel defaultSize={isSidebarOpen && isPropertiesOpen ? 55 : isSidebarOpen || isPropertiesOpen ? 75 : 100}>
-            <div className="w-full h-full relative">
+          <ResizablePanel defaultSize={isSidebarOpen && isPropertiesOpen ? 55 : isSidebarOpen || isPropertiesOpen ? 75 : 100} className="min-h-0 overflow-hidden">
+            <div className="w-full h-full min-h-0 relative overflow-hidden">
               <Scene />
               
               {/* Footer Info Overlay */}
@@ -106,8 +196,8 @@ export function EditorClient({ projectId, roomId, projectName, initialEntities }
           {isPropertiesOpen && (
             <>
               <ResizableHandle withHandle className="bg-transparent w-1 hover:bg-violet-500/20 transition-colors" />
-              <ResizablePanel defaultSize={25} minSize={20} maxSize={35} className="bg-[#161822]/80 backdrop-blur-xl">
-                <div className="h-full flex flex-col relative">
+              <ResizablePanel defaultSize={25} minSize={20} maxSize={35} className="bg-[#161822]/80 backdrop-blur-xl overflow-hidden min-h-0">
+                <div className="h-full min-h-0 flex flex-col relative overflow-hidden">
                   <PropertiesPanel />
                   <Button
                     variant="ghost"
