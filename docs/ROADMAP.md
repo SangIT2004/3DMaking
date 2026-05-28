@@ -88,18 +88,17 @@ Tài liệu này vạch ra lộ trình phát triển chi tiết cho dự án 3D 
 *   **Expected Output:**
     *   F5 lại trang hoặc mở dự án vào hôm sau, các đồ vật, vị trí, màu sắc vẫn được giữ nguyên.
 
-### Phase 6: Smart Assets & AI Assistant (Trợ lý & Thư viện Thông minh)
-*   **Mục tiêu:** Xây dựng hệ thống quản lý vật thể chất lượng cao và tích hợp AI hỗ trợ thiết kế.
+### Phase 6: AI Assist Text-to-3D (Trợ lý Sinh Mô Hình 3D)
+*   **Mục tiêu:** Xây dựng hệ thống trợ lý AI cho phép người dùng sinh mô hình 3D trực tiếp từ text prompt sử dụng LLM và OpenSCAD WASM.
 *   **Danh sách Task:**
-    *   **6.1 Asset Library Foundation:** Thiết lập hệ thống lưu trữ và quản lý file `.glb` chất lượng cao trong Supabase Storage. Hỗ trợ kéo thả vật thể phức tạp vào Scene.
-    *   **6.2 Semantic Smart Search:** Tích hợp OpenAI Embeddings + Supabase Vector để tìm kiếm vật thể theo ý nghĩa (ví dụ: "ghế êm ái cho phòng ngủ").
-    *   **6.3 AI Material Studio:** Sử dụng external API (như Fal.ai hoặc Stability AI) để sinh texture/vật liệu dựa trên mô tả và áp dụng cho vật thể.
-    *   **6.4 AI Scene Styling:** Sử dụng LLM để phân tích Scene và gợi ý thay đổi ánh sáng, màu sắc hoặc sắp xếp vật thể theo phong cách cụ thể (Scandinavian, Minimalist...).
+    *   **6.1 API Luân Phiên (Multi-Model):** Xây dựng API Route (`/api/generate-scad`) gọi mô hình ngôn ngữ (Gemini 2.0 Flash) để sinh code OpenSCAD. Triển khai cơ chế fallback sang mô hình Grok nếu Gemini bị lỗi (hoặc ngược lại).
+    *   **6.2 Compile OpenSCAD WASM:** Tích hợp package `openscad-wasm` (lazy load) trên trình duyệt để biên dịch mã SCAD nhận được từ API thành định dạng `.stl`.
+    *   **6.3 Three.js Integration:** Parse file `.stl` bằng `STLLoader`, tự động căn giữa, scale cho phù hợp và thêm `THREE.Mesh` sinh ra vào Scene hiện tại.
+    *   **6.4 Cập Nhật Database & UI:** Bổ sung trường `scad_code` và `prompt` vào bảng `entities`. Tạo bảng `ai_history` lưu lịch sử prompt. Xây dựng component `AIAssistPanel` trên giao diện Editor.
 *   **Expected Output:**
-    *   Người dùng có thể chọn từ hàng chục mẫu đồ nội thất đẹp (chân thực hơn các khối parametric).
-    *   Tìm kiếm đồ vật thông minh bằng ngôn ngữ tự nhiên.
-    *   Thay đổi vật liệu vật thể bằng AI prompt.
-    *   AI tự động đề xuất phong cách cho toàn bộ căn phòng.
+    *   Người dùng có thể gõ prompt bằng tiếng Việt (ví dụ: "ghế sofa màu xám") và nhận được mô hình 3D sau vài giây ngay trong trình duyệt mà không cần cloud storage cho file 3D.
+    *   Lịch sử sinh mô hình được lưu lại và hiển thị trên panel AI.
+    *   Hệ thống có khả năng dự phòng (fallback) tự động giữa 2 mô hình AI (Gemini/Grok) để đảm bảo độ tin cậy.
 
 ### Phase 7: UI Polish & Deployment (Hoàn thiện & Triển khai)
 *   **Mục tiêu:** Trau chuốt giao diện người dùng và đưa sản phẩm lên môi trường thực tế.

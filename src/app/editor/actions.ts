@@ -59,7 +59,9 @@ export async function saveEntity(entity: any, roomId: string) {
     rotation: { x: entity.rotation[0], y: entity.rotation[1], z: entity.rotation[2] },
     scale: { x: entity.scale[0], y: entity.scale[1], z: entity.scale[2] },
     color: entity.color,
-    metadata: { name: entity.name }
+    metadata: { name: entity.name },
+    ...(entity.scad_code && { scad_code: entity.scad_code }),
+    ...(entity.prompt && { prompt: entity.prompt })
   }
 
   const { error } = await supabase
@@ -79,4 +81,24 @@ export async function deleteEntity(id: string) {
 
   if (error) return { error: error.message }
   return { success: true }
+}
+
+export async function saveAILog(projectId: string, prompt: string, scadCode: string) {
+  const supabase = createClient();
+  const { data: userData } = await supabase.auth.getUser();
+  
+  if (!userData?.user) return { error: 'Not authenticated' };
+
+  const { error } = await supabase
+    .from('ai_logs')
+    .insert([{
+      user_id: userData.user.id,
+      project_id: projectId,
+      prompt: prompt,
+      scad_code: scadCode,
+      status: 'success'
+    }]);
+
+  if (error) return { error: error.message };
+  return { success: true };
 }

@@ -75,7 +75,7 @@ Quá trình phát triển được chia theo các giai đoạn (Phases) có tín
 3. **Phase 3: 3D Engine Core.** Khởi tạo React Three Fiber Canvas, setup Camera (OrbitControls), Ánh sáng, Grid và tính năng Raycasting.
 4. **Phase 4: Editor & Interactions.** Thêm TransformControls, Component Library (kéo thả đồ vật), Bảng thuộc tính (Properties Panel) và Zustand store.
 5. **Phase 5: Data Sync.** Serialize Scene -> DB và Deserialize DB -> Scene.
-6. **Phase 6: AI Integration.** Viết Supabase Edge Function gọi Meshy.ai, xử lý tải file `.glb` vào Canvas.
+6. **Phase 6: AI Integration.** Tích hợp LLM (Gemini/Grok luân phiên) để sinh mã OpenSCAD từ prompt. Biên dịch mã bằng `openscad-wasm` sang `.stl` trực tiếp trên trình duyệt và load vào Canvas.
 7. **Phase 7: UI Polish & Deployment.** Tối ưu UI/UX (Animations, Dark mode strict), đẩy lên VPS, config Nginx/SSL.
 
 ## 7. Feature Priorities (Ưu tiên tính năng)

@@ -26,6 +26,8 @@ export default async function EditorPage({ params }: EditorPageProps) {
     scale: [e.scale.x, e.scale.y, e.scale.z] as [number, number, number],
     color: e.color,
     name: e.metadata?.name || e.type,
+    ...(e.scad_code && { scad_code: e.scad_code }),
+    ...(e.prompt && { prompt: e.prompt })
   }));
 
   return (

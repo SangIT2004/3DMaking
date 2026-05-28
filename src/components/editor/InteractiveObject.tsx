@@ -8,7 +8,7 @@ import { Table } from "./objects/Table";
 import { Chair } from "./objects/Chair";
 import { Shelf } from "./objects/Shelf";
 import { Lamp } from "./objects/Lamp";
-import { AssetObject } from "./objects/AssetObject";
+import { AIGeneratedObject } from "./objects/AIGeneratedObject";
 import { Group, Mesh } from "three";
 import { saveEntity } from "@/app/editor/actions";
 import { useDebouncedCallback } from "use-debounce";
@@ -36,7 +36,7 @@ export function InteractiveObject({ entity }: { entity: Entity }) {
       case 'chair': return <Chair color={entity.color} />;
       case 'shelf': return <Shelf color={entity.color} />;
       case 'lamp': return <Lamp color={entity.color} />;
-      case 'asset': return entity.modelUrl ? <AssetObject url={entity.modelUrl} /> : <Box color={entity.color} />;
+      case 'ai_generated': return <AIGeneratedObject scadCode={entity.scad_code} color={entity.color} />;
       default: return <Box color={entity.color} />;
     }
   };

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { v4 as uuidv4 } from 'uuid';
 
-export type EntityType = 'box' | 'table' | 'chair' | 'shelf' | 'lamp' | 'asset';
+export type EntityType = 'box' | 'table' | 'chair' | 'shelf' | 'lamp' | 'ai_generated';
 
 export interface Entity {
   id: string;
@@ -10,8 +10,9 @@ export interface Entity {
   rotation: [number, number, number];
   scale: [number, number, number];
   color: string;
-  name: string;
-  modelUrl?: string; // Link .glb cho Asset
+  metadata?: any;
+  scad_code?: string;
+  prompt?: string;
 }
 
 export type TransformMode = 'translate' | 'rotate' | 'scale';
@@ -27,7 +28,7 @@ interface EditorState {
   // Actions
   setRoomId: (id: string) => void;
   setEntities: (entities: Entity[]) => void;
-  addEntity: (type: EntityType, modelUrl?: string, name?: string) => string; 
+  addEntity: (type: EntityType) => string; 
   removeEntity: (id: string) => void;
   updateEntity: (id: string, updates: Partial<Omit<Entity, 'id'>>) => void;
   selectEntity: (id: string | null) => void;
@@ -47,18 +48,17 @@ export const useEditorStore = create<EditorState>((set) => ({
   setRoomId: (id) => set({ roomId: id }),
   setEntities: (entities) => set({ entities }),
 
-  addEntity: (type, modelUrl, name) => {
+  addEntity: (type) => {
     const id = uuidv4();
     set((state) => {
       const newEntity: Entity = {
         id,
         type,
-        modelUrl,
         position: [0, 0, 0],
         rotation: [0, 0, 0],
         scale: [1, 1, 1],
         color: '#4B5563',
-        name: name || `${type.charAt(0).toUpperCase() + type.slice(1)} ${state.entities.length + 1}`,
+        name: `${type.charAt(0).toUpperCase() + type.slice(1)} ${state.entities.length + 1}`,
       };
       return { 
         entities: [...state.entities, newEntity],
