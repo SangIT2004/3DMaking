@@ -59,7 +59,7 @@ export function EditorClient({ projectId, roomId, projectName, initialEntities }
             <>
               <ResizablePanel defaultSize={20} minSize={15} maxSize={30} className="bg-[#161822]/80 backdrop-blur-xl">
                 <div className="h-full flex flex-col relative">
-                  <Sidebar />
+                  <Sidebar projectId={projectId} />
                   <Button
                     variant="ghost"
                     size="icon"

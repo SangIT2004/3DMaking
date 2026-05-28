@@ -88,18 +88,18 @@ Tài liệu này vạch ra lộ trình phát triển chi tiết cho dự án 3D 
 *   **Expected Output:**
     *   F5 lại trang hoặc mở dự án vào hôm sau, các đồ vật, vị trí, màu sắc vẫn được giữ nguyên.
 
-### Phase 6: AI Integration (Tích hợp Trí tuệ Nhân tạo)
-*   **Mục tiêu:** Đưa tính năng sinh mô hình 3D từ văn bản vào ứng dụng.
+### Phase 6: Smart Assets & AI Assistant (Trợ lý & Thư viện Thông minh)
+*   **Mục tiêu:** Xây dựng hệ thống quản lý vật thể chất lượng cao và tích hợp AI hỗ trợ thiết kế.
 *   **Danh sách Task:**
-    *   Xây dựng giao diện AI Chat (Left Sidebar).
-    *   Viết Supabase Edge Function để làm proxy gọi API của Meshy.ai (ẩn API Key).
-    *   Xử lý luồng gửi prompt -> nhận file `.glb` từ Meshy.ai.
-    *   Lưu file `.glb` vào Supabase Storage.
-    *   Tải (Load) mô hình `.glb` vào 3D Canvas bằng `@react-three/drei` (useGLTF).
-    *   Lưu lịch sử prompt vào bảng `ai_logs`.
+    *   **6.1 Asset Library Foundation:** Thiết lập hệ thống lưu trữ và quản lý file `.glb` chất lượng cao trong Supabase Storage. Hỗ trợ kéo thả vật thể phức tạp vào Scene.
+    *   **6.2 Semantic Smart Search:** Tích hợp OpenAI Embeddings + Supabase Vector để tìm kiếm vật thể theo ý nghĩa (ví dụ: "ghế êm ái cho phòng ngủ").
+    *   **6.3 AI Material Studio:** Sử dụng external API (như Fal.ai hoặc Stability AI) để sinh texture/vật liệu dựa trên mô tả và áp dụng cho vật thể.
+    *   **6.4 AI Scene Styling:** Sử dụng LLM để phân tích Scene và gợi ý thay đổi ánh sáng, màu sắc hoặc sắp xếp vật thể theo phong cách cụ thể (Scandinavian, Minimalist...).
 *   **Expected Output:**
-    *   Nhập "một chiếc ghế sofa màu đỏ" -> Đợi xử lý -> Ghế sofa xuất hiện trong Canvas.
-    *   Lịch sử sinh AI được lưu lại.
+    *   Người dùng có thể chọn từ hàng chục mẫu đồ nội thất đẹp (chân thực hơn các khối parametric).
+    *   Tìm kiếm đồ vật thông minh bằng ngôn ngữ tự nhiên.
+    *   Thay đổi vật liệu vật thể bằng AI prompt.
+    *   AI tự động đề xuất phong cách cho toàn bộ căn phòng.
 
 ### Phase 7: UI Polish & Deployment (Hoàn thiện & Triển khai)
 *   **Mục tiêu:** Trau chuốt giao diện người dùng và đưa sản phẩm lên môi trường thực tế.
