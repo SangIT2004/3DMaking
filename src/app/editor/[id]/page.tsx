@@ -13,9 +13,13 @@ export default async function EditorPage({ params }: EditorPageProps) {
 
   const data = await getEditorData(id);
 
-  if (data.error) {
+  if ('error' in data || !data.project || !data.room) {
     redirect('/dashboard');
   }
+
+  // At this point, data.project and data.room are guaranteed to exist
+  const project = data.project;
+  const room = data.room;
 
   // Transform entities from DB format to Zustand format
   const initialEntities = (data.entities || []).map((e: any) => {
@@ -40,7 +44,7 @@ export default async function EditorPage({ params }: EditorPageProps) {
     };
   });
 
-  const initialEnvSettings = data.room.environment_settings || {
+  const initialEnvSettings = room.environment_settings || {
     backgroundColor: '#0F1117',
     lightIntensity: 1.5,
   };
@@ -49,9 +53,9 @@ export default async function EditorPage({ params }: EditorPageProps) {
     <main className="w-screen h-screen overflow-hidden bg-[#0F1117]">
       <EditorClient 
         projectId={id} 
-        roomId={data.room.id}
+        roomId={room.id}
         initialEntities={initialEntities}
-        projectName={data.project.name}
+        projectName={project.name || 'Untitled Project'}
         initialEnvSettings={initialEnvSettings}
       />
     </main>
